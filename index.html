@@ -692,13 +692,14 @@
         <button class="nav-dot" data-slide="3" data-tooltip="Claude Opus 4.6 Strengths" aria-label="Slide 4"></button>
         <button class="nav-dot" data-slide="4" data-tooltip="Benchmarks" aria-label="Slide 5"></button>
         <button class="nav-dot" data-slide="5" data-tooltip="Context & Efficiency" aria-label="Slide 6"></button>
-        <button class="nav-dot" data-slide="6" data-tooltip="Claude Code + GPT-5.4?" aria-label="Slide 7"></button>
-        <button class="nav-dot" data-slide="7" data-tooltip="Decision Matrix" aria-label="Slide 8"></button>
-        <button class="nav-dot" data-slide="8" data-tooltip="Bottom Line" aria-label="Slide 9"></button>
+        <button class="nav-dot" data-slide="6" data-tooltip="Cost Comparison" aria-label="Slide 7"></button>
+        <button class="nav-dot" data-slide="7" data-tooltip="Claude Code + GPT-5.4?" aria-label="Slide 8"></button>
+        <button class="nav-dot" data-slide="8" data-tooltip="Decision Matrix" aria-label="Slide 9"></button>
+        <button class="nav-dot" data-slide="9" data-tooltip="Bottom Line" aria-label="Slide 10"></button>
     </nav>
 
     <!-- Slide counter -->
-    <div class="slide-counter" id="slide-counter">1 / 9</div>
+    <div class="slide-counter" id="slide-counter">1 / 10</div>
 
     <!-- Keyboard hint -->
     <div class="bottom-bar">
@@ -872,8 +873,8 @@
          SLIDE 5 — BENCHMARKS
     ════════════════════════════════════════════════════════════ -->
     <section class="slide" id="slide-5">
-        <div class="stagger" style="max-width: 760px;">
-            <span class="label both">Head-to-Head</span>
+        <div class="stagger" style="max-width: 820px;">
+            <span class="label both">Head-to-Head — Both Models Measured</span>
             <h2>Benchmarks</h2>
             <div class="divider both"></div>
 
@@ -883,60 +884,84 @@
                         <tr>
                             <th>Benchmark</th>
                             <th>GPT-5.4 🟢</th>
-                            <th>Claude Opus 4.6 🟣</th>
-                            <th>Winner</th>
+                            <th>Opus 4.6 🟣</th>
+                            <th>W</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>SWE-Bench Verified</td>
-                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:58px"></div><span class="winner">57.7%</span></div></td>
-                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:81px"></div><span class="winner" style="color:var(--accent-claude)">81%</span></div></td>
+                            <td>OSWorld <span class="dim text-xs">(computer use)</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:75px"></div><span class="winner">75.0%</span></div></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:73px"></div><span>72.7%</span></div></td>
+                            <td><span class="badge gpt">GPT</span></td>
+                        </tr>
+                        <tr>
+                            <td>BrowseComp <span class="dim text-xs">(web tasks)</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:83px"></div><span>82.7%</span></div></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:84px"></div><span class="winner" style="color:var(--accent-claude)">84.0%</span></div></td>
                             <td><span class="badge claude">Claude</span></td>
                         </tr>
                         <tr>
-                            <td>Terminal-Bench 2.0</td>
-                            <td><span class="loser dim">N/A</span></td>
-                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:65px"></div><span class="winner" style="color:var(--accent-claude)">65%</span></div></td>
+                            <td>GPQA Diamond <span class="dim text-xs">(PhD science)</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:93px"></div><span class="winner">93.2%</span></div></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:91px"></div><span>91.3%</span></div></td>
+                            <td><span class="badge gpt">GPT</span></td>
+                        </tr>
+                        <tr>
+                            <td>ARC-AGI-2 <span class="dim text-xs">(novel reasoning)</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:54px"></div><span>54.2%</span></div></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:69px"></div><span class="winner" style="color:var(--accent-claude)">68.8%</span></div></td>
                             <td><span class="badge claude">Claude</span></td>
                         </tr>
                         <tr>
-                            <td>ARC-AGI (Novel Reasoning)</td>
-                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:53px"></div><span>52.9%</span></div></td>
-                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:69px"></div><span class="winner" style="color:var(--accent-claude)">69%</span></div></td>
+                            <td>Terminal-Bench <span class="dim text-xs">(agentic dev)</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:65px"></div><span>64.7%</span></div></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:65px"></div><span class="winner" style="color:var(--accent-claude)">65.4%</span></div></td>
+                            <td><span class="badge claude">~Tie</span></td>
+                        </tr>
+                        <tr>
+                            <td>SWE-Bench Verified <span class="dim text-xs">(coding)</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:80px"></div><span>80.0%</span></div></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:81px"></div><span class="winner" style="color:var(--accent-claude)">80.8%</span></div></td>
+                            <td><span class="badge claude">~Tie</span></td>
+                        </tr>
+                        <tr>
+                            <td>HumanEval <span class="dim text-xs">(code gen)</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:95px"></div><span>95.0%</span></div></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:95px"></div><span>95.0%</span></div></td>
+                            <td><span class="dim text-xs">Tie</span></td>
+                        </tr>
+                        <tr>
+                            <td>AIME 2025 <span class="dim text-xs">(math)</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:100px"></div><span>100%</span></div></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:100px"></div><span>100%</span></div></td>
+                            <td><span class="dim text-xs">Tie</span></td>
+                        </tr>
+                        <tr>
+                            <td>HLE <span class="dim text-xs">(hardest exam)</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:50px"></div><span>50.0%</span></div></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:53px"></div><span class="winner" style="color:var(--accent-claude)">53.0%</span></div></td>
                             <td><span class="badge claude">Claude</span></td>
                         </tr>
                         <tr>
-                            <td>GPQA Diamond (Science)</td>
-                            <td><span class="loser dim">N/A</span></td>
-                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:91px"></div><span class="winner" style="color:var(--accent-claude)">91%</span></div></td>
+                            <td>τ2-bench <span class="dim text-xs">(agent tasks)</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:82px"></div><span>82.0%</span></div></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:92px"></div><span class="winner" style="color:var(--accent-claude)">91.9%</span></div></td>
                             <td><span class="badge claude">Claude</span></td>
-                        </tr>
-                        <tr>
-                            <td>OSWorld (Computer Use)</td>
-                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:75px"></div><span class="winner">75%</span></div></td>
-                            <td><span class="loser dim">N/A</span></td>
-                            <td><span class="badge gpt">GPT-5.4</span></td>
-                        </tr>
-                        <tr>
-                            <td>GDPval (Knowledge Work)</td>
-                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:83px"></div><span class="winner">83%</span></div></td>
-                            <td><span class="loser dim">N/A</span></td>
-                            <td><span class="badge gpt">GPT-5.4</span></td>
-                        </tr>
-                        <tr>
-                            <td>Spreadsheet Modeling</td>
-                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:87px"></div><span class="winner">87.3%</span></div></td>
-                            <td><span class="loser dim">N/A</span></td>
-                            <td><span class="badge gpt">GPT-5.4</span></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <div class="caveat mt-16">
-                <strong>⚠️ Benchmark honesty:</strong> Each company self-reports their own numbers. Third-party evals (Scale AI SWE-Bench Pro) show them much closer: GPT-5 at 23.3% vs Opus 4.1 at 23.1%. The truth is these models are extremely competitive — the real difference is in tooling and workflow fit, not headline benchmarks.
-            </div>
+            <p class="dim text-xs mt-12" style="line-height:1.6;">
+                <strong style="color:var(--text-muted)">Scorecard:</strong> Claude wins 5 · GPT wins 2 · Ties 3<br>
+                <strong style="color:var(--text-muted)">Note:</strong> GPT numbers use 5.2 where 5.4 not yet published. OSWorld and BrowseComp are GPT-5.4 specific.<br>
+                <strong style="color:var(--text-muted)">Sources:</strong>
+                <a href="https://openai.com/index/introducing-gpt-5-4/" style="color:var(--accent-gpt)">OpenAI GPT-5.4 Blog</a> ·
+                <a href="https://onyx.app/llm-leaderboard" style="color:var(--accent-info)">Onyx LLM Leaderboard</a> ·
+                <a href="https://scale.com/leaderboard/swe_bench_pro_public" style="color:var(--accent-info)">Scale AI SWE-Bench Pro</a> ·
+                <a href="https://www.anthropic.com/news/claude-4-6" style="color:var(--accent-claude)">Anthropic Claude 4.6</a>
+            </p>
         </div>
     </section>
 
@@ -994,7 +1019,92 @@
 
 
     <!-- ═══════════════════════════════════════════════════════════
-         SLIDE 7 — CLAUDE CODE + GPT-5.4?
+         SLIDE 7 — COST COMPARISON
+    ════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-cost">
+        <div class="stagger" style="max-width: 780px;">
+            <span class="label both">API Pricing</span>
+            <h2>What does it <span class="gradient-text">cost?</span></h2>
+            <div class="divider both"></div>
+
+            <div class="card mt-24">
+                <table class="bench-table">
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Input / 1M tokens</th>
+                            <th>Output / 1M tokens</th>
+                            <th>Context</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: rgba(16,185,129,0.06);">
+                            <td><strong class="gpt-text">GPT-5.4</strong></td>
+                            <td><strong style="color:var(--accent-gpt)">~$2.00</strong></td>
+                            <td><strong style="color:var(--accent-gpt)">~$8.00</strong></td>
+                            <td>1M</td>
+                        </tr>
+                        <tr>
+                            <td class="dim">GPT-5.4 Pro</td>
+                            <td class="dim">TBD</td>
+                            <td class="dim">TBD</td>
+                            <td class="dim">1M</td>
+                        </tr>
+                        <tr style="background: rgba(124,111,247,0.06);">
+                            <td><strong class="claude-text">Claude Opus 4.6</strong></td>
+                            <td><strong style="color:var(--accent-claude)">$15.00</strong></td>
+                            <td><strong style="color:var(--accent-claude)">$75.00</strong></td>
+                            <td>200K (1M beta)</td>
+                        </tr>
+                        <tr>
+                            <td class="dim">Claude Opus 4.6 (no thinking)</td>
+                            <td class="dim">$5.00</td>
+                            <td class="dim">$25.00</td>
+                            <td class="dim">200K (1M beta)</td>
+                        </tr>
+                        <tr>
+                            <td class="dim">Claude Sonnet 4.6</td>
+                            <td class="dim">$3.00</td>
+                            <td class="dim">$15.00</td>
+                            <td class="dim">200K</td>
+                        </tr>
+                        <tr>
+                            <td class="dim">GPT-5.2</td>
+                            <td class="dim">$2.00</td>
+                            <td class="dim">$8.00</td>
+                            <td class="dim">128K</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="grid-2 mt-24">
+                <div class="card gpt-card">
+                    <h3>🟢 GPT-5.4 Cost Advantage</h3>
+                    <p class="text-sm mt-8">At ~$2/$8, GPT-5.4 is <strong>7.5× cheaper on input</strong> and <strong>9× cheaper on output</strong> than Opus 4.6 with thinking. For bulk/agentic work, this adds up fast.</p>
+                </div>
+                <div class="card claude-card">
+                    <h3>🟣 Claude Max Plan</h3>
+                    <p class="text-sm mt-8">If you're on Claude Max ($100-200/mo), you get unlimited Opus usage — no per-token cost. Makes the pricing gap irrelevant for your daily workflow.</p>
+                </div>
+            </div>
+
+            <div class="card info-card mt-16">
+                <p class="text-sm"><strong style="color:var(--accent-info)">Real-world example:</strong> Processing 500K tokens in + 100K out. GPT-5.4: ~$1.80. Opus 4.6 (thinking): ~$15.00. Opus (no thinking): ~$5.00. At scale, GPT-5.4 wins on cost — unless you're on Max.</p>
+            </div>
+
+            <p class="dim text-xs mt-12">
+                <strong style="color:var(--text-muted)">Sources:</strong>
+                <a href="https://openai.com/api/pricing/" style="color:var(--accent-gpt)">OpenAI Pricing</a> ·
+                <a href="https://www.anthropic.com/pricing" style="color:var(--accent-claude)">Anthropic Pricing</a> ·
+                GPT-5.4 pricing estimated from GPT-5.2 tier; official pricing pending.
+            </p>
+        </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 8 — CLAUDE CODE + GPT-5.4?
     ════════════════════════════════════════════════════════════ -->
     <section class="slide" id="slide-7">
         <div class="stagger" style="max-width: 720px;">
