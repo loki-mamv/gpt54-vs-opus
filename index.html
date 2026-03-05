@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-5.4 vs Claude Opus 4.6 — When to Use What</title>
+
+    <!-- Gradient Wave style: Cabinet Grotesk + Inter via Fontshare/Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800,900&display=swap">
+
+    <style>
+        /* ── VARIABLES ─────────────────────────────────────────── */
+        :root {
+            --bg-primary:    #060b16;
+            --bg-card:       rgba(255,255,255,0.04);
+            --bg-card-hover: rgba(255,255,255,0.07);
+            --text-primary:  #f0f4ff;
+            --text-muted:    rgba(240,244,255,0.5);
+            --text-dim:      rgba(240,244,255,0.35);
+            --accent-gpt:    #10b981;   /* emerald — OpenAI green-ish */
+            --accent-claude: #7c6ff7;   /* violet — Anthropic purple */
+            --accent-warn:   #f59e0b;   /* amber — caution */
+            --accent-info:   #38bdf8;   /* sky — info */
+            --gradient-gpt:    linear-gradient(135deg, #10b981, #059669);
+            --gradient-claude: linear-gradient(135deg, #7c6ff7, #4f46e5);
+            --gradient-wave:   linear-gradient(135deg, #10b981 0%, #7c6ff7 100%);
+            --font-display: 'Cabinet Grotesk', sans-serif;
+            --font-body:    'Inter', sans-serif;
+            --slide-padding: 60px 80px;
+            --border-subtle: rgba(255,255,255,0.08);
+        }
+
+        /* ── RESET ─────────────────────────────────────────────── */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            overflow-y: scroll;
+            height: 100%;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── BACKGROUND MESH ──────────────────────────────────── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(16,185,129,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 80% at 80% 90%, rgba(124,111,247,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(56,189,248,0.03) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── SLIDE BASE ───────────────────────────────────────── */
+        .slide {
+            position: relative;
+            min-height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: var(--slide-padding);
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 1;
+        }
+
+        .slide.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* stagger children */
+        .slide.visible .stagger > * {
+            animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .slide.visible .stagger > *:nth-child(1) { animation-delay: 0.05s; }
+        .slide.visible .stagger > *:nth-child(2) { animation-delay: 0.12s; }
+        .slide.visible .stagger > *:nth-child(3) { animation-delay: 0.19s; }
+        .slide.visible .stagger > *:nth-child(4) { animation-delay: 0.26s; }
+        .slide.visible .stagger > *:nth-child(5) { animation-delay: 0.33s; }
+        .slide.visible .stagger > *:nth-child(6) { animation-delay: 0.40s; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── PROGRESS BAR ─────────────────────────────────────── */
+        .progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 3px;
+            background: var(--gradient-wave);
+            width: 0%;
+            z-index: 200;
+            transition: width 0.35s ease;
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* ── NAV DOTS ─────────────────────────────────────────── */
+        .nav-dots {
+            position: fixed;
+            right: 28px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 200;
+        }
+
+        .nav-dot {
+            position: relative;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.18);
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot:hover,
+        .nav-dot.active {
+            background: var(--gradient-wave);
+            transform: scale(1.4);
+            box-shadow: 0 0 12px rgba(16,185,129,0.4);
+        }
+
+        /* tooltip */
+        .nav-dot::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            right: calc(100% + 14px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(6,11,22,0.92);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+            padding: 4px 10px;
+            border-radius: 6px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .nav-dot:hover::after { opacity: 1; }
+
+        /* ── SLIDE COUNTER ────────────────────────────────────── */
+        .slide-counter {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-dim);
+            z-index: 200;
+            letter-spacing: 0.05em;
+            font-family: var(--font-body);
+        }
+
+        /* ── TYPOGRAPHY ───────────────────────────────────────── */
+        .label {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .label.gpt    { color: var(--accent-gpt); }
+        .label.claude { color: var(--accent-claude); }
+        .label.both   { background: var(--gradient-wave); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.4rem, 5vw, 4.2rem);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 3.5vw, 3rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        h3 {
+            font-family: var(--font-display);
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        p { color: rgba(240,244,255,0.75); }
+
+        .gradient-text {
+            background: var(--gradient-wave);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gpt-text    { color: var(--accent-gpt); }
+        .claude-text { color: var(--accent-claude); }
+
+        /* ── CARDS ────────────────────────────────────────────── */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 28px 32px;
+            backdrop-filter: blur(12px);
+        }
+
+        .card.gpt-card {
+            border-color: rgba(16,185,129,0.25);
+            background: rgba(16,185,129,0.06);
+        }
+
+        .card.claude-card {
+            border-color: rgba(124,111,247,0.25);
+            background: rgba(124,111,247,0.06);
+        }
+
+        .card.warn-card {
+            border-color: rgba(245,158,11,0.25);
+            background: rgba(245,158,11,0.05);
+        }
+
+        .card.info-card {
+            border-color: rgba(56,189,248,0.2);
+            background: rgba(56,189,248,0.05);
+        }
+
+        /* ── BADGE ────────────────────────────────────────────── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+        .badge.gpt    { background: rgba(16,185,129,0.15); color: var(--accent-gpt); border: 1px solid rgba(16,185,129,0.3); }
+        .badge.claude { background: rgba(124,111,247,0.15); color: var(--accent-claude); border: 1px solid rgba(124,111,247,0.3); }
+        .badge.warn   { background: rgba(245,158,11,0.12); color: var(--accent-warn); border: 1px solid rgba(245,158,11,0.3); }
+
+        /* ── UTILITY ──────────────────────────────────────────── */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .flex-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .divider {
+            width: 48px;
+            height: 3px;
+            border-radius: 2px;
+            margin: 20px 0;
+        }
+
+        .divider.gpt    { background: var(--gradient-gpt); }
+        .divider.claude { background: var(--gradient-claude); }
+        .divider.both   { background: var(--gradient-wave); }
+
+        ul { list-style: none; }
+
+        ul li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 10px;
+            color: rgba(240,244,255,0.78);
+            font-size: 0.95rem;
+            line-height: 1.55;
+        }
+
+        ul li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--text-dim);
+            font-size: 0.8em;
+            top: 2px;
+        }
+
+        ul.gpt-list li::before   { color: var(--accent-gpt); }
+        ul.claude-list li::before { color: var(--accent-claude); }
+
+        .stat-big {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.88em;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 2px 7px;
+            color: var(--accent-info);
+        }
+
+        pre {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 20px 24px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: var(--accent-info);
+            overflow-x: auto;
+        }
+
+        pre .comment { color: var(--text-dim); }
+        pre .key     { color: var(--accent-gpt); }
+        pre .val     { color: var(--accent-warn); }
+
+        /* ── BENCHMARK TABLE ──────────────────────────────────── */
+        .bench-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .bench-table th {
+            text-align: left;
+            padding: 10px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .bench-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: rgba(240,244,255,0.8);
+            vertical-align: middle;
+        }
+
+        .bench-table tr:last-child td { border-bottom: none; }
+
+        .bench-table .winner { color: var(--accent-gpt); font-weight: 600; }
+        .bench-table .loser  { color: var(--text-dim); }
+
+        .bench-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bench-bar {
+            height: 6px;
+            border-radius: 3px;
+            min-width: 4px;
+        }
+
+        .bench-bar.gpt    { background: var(--gradient-gpt); }
+        .bench-bar.claude { background: var(--gradient-claude); }
+
+        /* ── DECISION MATRIX ──────────────────────────────────── */
+        .matrix-row {
+            display: grid;
+            grid-template-columns: 1fr 80px 1fr;
+            gap: 12px;
+            align-items: stretch;
+            margin-bottom: 10px;
+        }
+
+        .matrix-cell {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.88rem;
+            color: rgba(240,244,255,0.75);
+            line-height: 1.4;
+        }
+
+        .matrix-cell.gpt-cell {
+            border-color: rgba(16,185,129,0.2);
+            background: rgba(16,185,129,0.05);
+        }
+
+        .matrix-cell.claude-cell {
+            border-color: rgba(124,111,247,0.2);
+            background: rgba(124,111,247,0.05);
+        }
+
+        .matrix-vs {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            letter-spacing: 0.05em;
+        }
+
+        /* ── SLIDE 1 SPECIFIC ─────────────────────────────────── */
+        #slide-1 {
+            align-items: center;
+            text-align: center;
+        }
+
+        #slide-1 .hero-vs {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            margin: 40px 0;
+        }
+
+        .model-pill {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .model-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .model-icon.gpt    { background: rgba(16,185,129,0.15); border: 2px solid rgba(16,185,129,0.4); }
+        .model-icon.claude { background: rgba(124,111,247,0.15); border: 2px solid rgba(124,111,247,0.4); }
+
+        .model-name {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .vs-divider {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: var(--gradient-wave);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 520px;
+            line-height: 1.65;
+        }
+
+        /* ── SLIDE 2: TL;DR ────────────────────────────────────── */
+        .tldr-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 8px;
+        }
+
+        .tldr-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 22px 26px;
+        }
+
+        .tldr-item .emoji {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+        }
+
+        .tldr-item h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .tldr-item p {
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+
+        /* ── CONTEXT BAR VIZ ──────────────────────────────────── */
+        .ctx-vis {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .ctx-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ctx-label-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+
+        .ctx-bar-track {
+            height: 10px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .ctx-bar {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 1s cubic-bezier(0.22,1,0.36,1);
+        }
+
+        /* ── BOTTOM BAR ──────────────────────────────────────── */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .kbd-hint {
+            font-size: 11px;
+            color: var(--text-dim);
+            font-weight: 500;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── REDUCED MOTION ───────────────────────────────────── */
+        @media (prefers-reduced-motion: reduce) {
+            .slide { transition: opacity 0.3s ease; transform: none !important; }
+            .slide.visible .stagger > * { animation: none; opacity: 1; }
+        }
+
+        /* ── RESPONSIVE ───────────────────────────────────────── */
+        @media (max-width: 900px) {
+            :root { --slide-padding: 50px 50px; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .grid-3 { grid-template-columns: 1fr 1fr; }
+            .tldr-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            :root { --slide-padding: 40px 28px 60px; }
+
+            h1 { font-size: clamp(1.9rem, 6vw, 2.8rem); }
+            h2 { font-size: clamp(1.5rem, 5vw, 2.2rem); }
+
+            .nav-dots { right: 14px; }
+            .nav-dot::after { display: none; }
+
+            .grid-3 { grid-template-columns: 1fr; }
+
+            .matrix-row { grid-template-columns: 1fr; }
+            .matrix-vs { display: none; }
+
+            .bench-table th:last-child,
+            .bench-table td:last-child { display: none; }
+
+            #slide-1 .hero-vs { gap: 20px; }
+            .model-icon { width: 56px; height: 56px; font-size: 1.6rem; }
+
+            .slide-counter { display: none; }
+            pre { font-size: 0.74rem; padding: 16px; }
+        }
+
+        @media (max-width: 480px) {
+            :root { --slide-padding: 30px 20px 60px; }
+
+            h1 { font-size: 1.7rem; }
+            h2 { font-size: 1.4rem; }
+            h3 { font-size: 1rem; }
+
+            .card { padding: 18px 20px; }
+            .tldr-grid { grid-template-columns: 1fr; }
+            .bench-table td { padding: 8px 10px; font-size: 0.8rem; }
+        }
+
+        /* ── MISC HELPERS ─────────────────────────────────────── */
+        .mt-4  { margin-top: 4px; }
+        .mt-8  { margin-top: 8px; }
+        .mt-12 { margin-top: 12px; }
+        .mt-16 { margin-top: 16px; }
+        .mt-24 { margin-top: 24px; }
+        .mt-32 { margin-top: 32px; }
+        .mt-40 { margin-top: 40px; }
+
+        .text-sm { font-size: 0.85rem; }
+        .text-xs { font-size: 0.78rem; }
+        .muted   { color: var(--text-muted); }
+        .dim     { color: var(--text-dim); }
+
+        .max-w-prose { max-width: 680px; }
+
+        /* ── HONEST CAVEAT BOX ──────────────────────────────── */
+        .caveat {
+            background: rgba(245,158,11,0.06);
+            border: 1px solid rgba(245,158,11,0.2);
+            border-left: 3px solid var(--accent-warn);
+            border-radius: 0 8px 8px 0;
+            padding: 12px 16px;
+            font-size: 0.82rem;
+            color: rgba(245,158,11,0.85);
+            line-height: 1.55;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Progress bar -->
+    <div class="progress-bar" id="progress"></div>
+
+    <!-- Nav dots -->
+    <nav class="nav-dots" aria-label="Slide navigation">
+        <button class="nav-dot active" data-slide="0" data-tooltip="Cover" aria-label="Slide 1"></button>
+        <button class="nav-dot" data-slide="1" data-tooltip="TL;DR" aria-label="Slide 2"></button>
+        <button class="nav-dot" data-slide="2" data-tooltip="GPT-5.4 Strengths" aria-label="Slide 3"></button>
+        <button class="nav-dot" data-slide="3" data-tooltip="Claude Opus 4.6 Strengths" aria-label="Slide 4"></button>
+        <button class="nav-dot" data-slide="4" data-tooltip="Benchmarks" aria-label="Slide 5"></button>
+        <button class="nav-dot" data-slide="5" data-tooltip="Context & Efficiency" aria-label="Slide 6"></button>
+        <button class="nav-dot" data-slide="6" data-tooltip="Claude Code + GPT-5.4?" aria-label="Slide 7"></button>
+        <button class="nav-dot" data-slide="7" data-tooltip="Decision Matrix" aria-label="Slide 8"></button>
+        <button class="nav-dot" data-slide="8" data-tooltip="Bottom Line" aria-label="Slide 9"></button>
+    </nav>
+
+    <!-- Slide counter -->
+    <div class="slide-counter" id="slide-counter">1 / 9</div>
+
+    <!-- Keyboard hint -->
+    <div class="bottom-bar">
+        <span class="kbd-hint">↑ ↓ arrow keys &nbsp;·&nbsp; space &nbsp;·&nbsp; swipe</span>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 1 — COVER
+    ════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-1">
+        <div class="stagger" style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <span class="label both">Released March 5, 2026</span>
+
+            <h1>GPT-5.4<br><span class="gradient-text">vs</span><br>Claude Opus 4.6</h1>
+
+            <div class="hero-vs mt-32">
+                <div class="model-pill">
+                    <div class="model-icon gpt">🟢</div>
+                    <span class="model-name gpt-text">GPT-5.4</span>
+                    <span class="badge gpt">OpenAI</span>
+                </div>
+                <div class="vs-divider">vs</div>
+                <div class="model-pill">
+                    <div class="model-icon claude">🟣</div>
+                    <span class="model-name claude-text">Claude Opus 4.6</span>
+                    <span class="badge claude">Anthropic</span>
+                </div>
+            </div>
+
+            <p class="subtitle mt-24">
+                When should you reach for GPT-5.4 instead of Claude?<br>
+                And can you run GPT-5.4 <em>inside</em> Claude Code?
+            </p>
+        </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 2 — TL;DR
+    ════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-2">
+        <div class="stagger max-w-prose">
+            <span class="label both">TL;DR</span>
+            <h2>Quick call</h2>
+            <div class="divider both"></div>
+
+            <div class="tldr-grid">
+                <div class="tldr-item" style="border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.06);">
+                    <div class="emoji">🟢</div>
+                    <h3 class="gpt-text">Reach for GPT-5.4 when…</h3>
+                    <p>You're doing office work — slide decks, financial models, legal docs, anything that needs computer-use automation or long-horizon deliverables up to 1M tokens.</p>
+                </div>
+
+                <div class="tldr-item" style="border-color: rgba(124,111,247,0.3); background: rgba(124,111,247,0.06);">
+                    <div class="emoji">🟣</div>
+                    <h3 class="claude-text">Stay on Claude Opus 4.6 when…</h3>
+                    <p>You're writing code, running agentic dev workflows in Claude Code, or you need tight instruction-following and nuanced reasoning on your own files/repos.</p>
+                </div>
+
+                <div class="tldr-item">
+                    <div class="emoji">⚡</div>
+                    <h3>Claude Code + GPT-5.4?</h3>
+                    <p>Yes — via LiteLLM proxy. Native support doesn't exist, but it's doable with some setup. Or just use OpenCode instead.</p>
+                </div>
+
+                <div class="tldr-item" style="border-color: rgba(245,158,11,0.2);">
+                    <div class="emoji">⚠️</div>
+                    <h3 style="color: var(--accent-warn);">Benchmark warning</h3>
+                    <p>OpenAI self-reports evals. Third-party SWE-Bench Pro numbers for Claude (23.1%) and GPT-5.4 (57.7%) aren't apples-to-apples — conditions differ significantly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 3 — GPT-5.4 STRENGTHS
+    ════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-3">
+        <div class="stagger max-w-prose">
+            <span class="label gpt">GPT-5.4</span>
+            <h2>Where it <span class="gpt-text">dominates</span></h2>
+            <div class="divider gpt"></div>
+
+            <div class="grid-2 mt-24">
+                <div class="card gpt-card">
+                    <h3 class="mt-4">🖥️ Native Computer Use</h3>
+                    <p class="text-sm mt-8">First general-purpose model with built-in computer-use. OSWorld-Verified: <strong class="gpt-text">75%</strong> — record. Clicks, types, navigates UIs autonomously.</p>
+                </div>
+
+                <div class="card gpt-card">
+                    <h3 class="mt-4">📊 Office Work</h3>
+                    <p class="text-sm mt-8">Spreadsheet modeling: <strong class="gpt-text">87.3%</strong> vs 68.4% on GPT-5.2. Presentations preferred 68% over GPT-5.2. Built for knowledge work.</p>
+                </div>
+
+                <div class="card gpt-card">
+                    <h3 class="mt-4">📚 1M Token Context</h3>
+                    <p class="text-sm mt-8">Double GPT-5.2's 400K. Load entire codebases, legal filings, financial documents without chunking.</p>
+                </div>
+
+                <div class="card gpt-card">
+                    <h3 class="mt-4">🔧 Tool Search</h3>
+                    <p class="text-sm mt-8">Models look up tool definitions dynamically instead of loading all upfront. Drastically more efficient in multi-tool agentic setups.</p>
+                </div>
+            </div>
+
+            <div class="card mt-24" style="background:rgba(16,185,129,0.04); border-color: rgba(16,185,129,0.15);">
+                <div class="flex-row" style="gap:24px; flex-wrap:wrap;">
+                    <div>
+                        <div class="stat-big gpt-text">83%</div>
+                        <div class="stat-label">GDPval (knowledge work)</div>
+                    </div>
+                    <div>
+                        <div class="stat-big gpt-text">82.7%</div>
+                        <div class="stat-label">BrowseComp</div>
+                    </div>
+                    <div>
+                        <div class="stat-big gpt-text">33%</div>
+                        <div class="stat-label">fewer factual errors vs GPT-5.2</div>
+                    </div>
+                    <div>
+                        <div class="stat-big gpt-text">54.6%</div>
+                        <div class="stat-label">Toolathlon</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 4 — CLAUDE OPUS 4.6 STRENGTHS
+    ════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-4">
+        <div class="stagger max-w-prose">
+            <span class="label claude">Claude Opus 4.6</span>
+            <h2>Where it <span class="claude-text">holds firm</span></h2>
+            <div class="divider claude"></div>
+
+            <div class="grid-2 mt-24">
+                <div class="card claude-card">
+                    <h3 class="mt-4">🧑‍💻 Agentic Coding</h3>
+                    <p class="text-sm mt-8">Claude Code is Anthropic's CLI — deeply integrated. It reads your files, runs tests, makes commits, and iterates. No equivalent native experience with GPT.</p>
+                </div>
+
+                <div class="card claude-card">
+                    <h3 class="mt-4">📋 Instruction Following</h3>
+                    <p class="text-sm mt-8">When you give nuanced, multi-part instructions, Claude locks on. It's less likely to hallucinate constraints you didn't ask for or ignore ones you did.</p>
+                </div>
+
+                <div class="card claude-card">
+                    <h3 class="mt-4">🔗 Extended Thinking</h3>
+                    <p class="text-sm mt-8">Chain-of-thought reasoning for hard problems. Transparent "thinking" blocks let you see the actual reasoning process — not just the answer.</p>
+                </div>
+
+                <div class="card claude-card">
+                    <h3 class="mt-4">⚡ Claude Sonnet 4.6</h3>
+                    <p class="text-sm mt-8">Faster and cheaper alternative in the same family. For most coding tasks, Sonnet 4.6 is the better daily driver — save Opus for the hard stuff.</p>
+                </div>
+            </div>
+
+            <div class="caveat mt-24">
+                <strong>Honest take:</strong> Claude's coding capability is excellent on real-world tasks. The SWE-Bench Pro gap (23.1% vs 57.7%) looks bad but those numbers come from different evaluation setups. Don't trust headline benchmarks alone.
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 5 — BENCHMARKS
+    ════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-5">
+        <div class="stagger" style="max-width: 760px;">
+            <span class="label both">Head-to-Head</span>
+            <h2>Benchmarks</h2>
+            <div class="divider both"></div>
+
+            <div class="card mt-24">
+                <table class="bench-table">
+                    <thead>
+                        <tr>
+                            <th>Benchmark</th>
+                            <th>GPT-5.4 🟢</th>
+                            <th>Claude Opus 4.6 🟣</th>
+                            <th>Winner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>SWE-Bench Pro <span class="dim text-xs">*</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:58px"></div><span class="winner">57.7%</span></div></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:23px"></div><span class="loser">23.1%</span></div></td>
+                            <td><span class="badge gpt">GPT-5.4</span></td>
+                        </tr>
+                        <tr>
+                            <td>OSWorld (Computer Use)</td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:75px"></div><span class="winner">75%</span></div></td>
+                            <td><span class="loser dim">N/A</span></td>
+                            <td><span class="badge gpt">GPT-5.4</span></td>
+                        </tr>
+                        <tr>
+                            <td>GDPval (Knowledge Work)</td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:83px"></div><span class="winner">83%</span></div></td>
+                            <td><span class="loser dim">N/A</span></td>
+                            <td><span class="badge gpt">GPT-5.4</span></td>
+                        </tr>
+                        <tr>
+                            <td>BrowseComp</td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:82px"></div><span class="winner">82.7%</span></div></td>
+                            <td><span class="loser dim">N/A</span></td>
+                            <td><span class="badge gpt">GPT-5.4</span></td>
+                        </tr>
+                        <tr>
+                            <td>Spreadsheet Modeling</td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:87px"></div><span class="winner">87.3%</span></div></td>
+                            <td><span class="loser dim">N/A</span></td>
+                            <td><span class="badge gpt">GPT-5.4</span></td>
+                        </tr>
+                        <tr>
+                            <td>Agentic Dev (real-world)</td>
+                            <td><span class="loser dim">Limited native tooling</span></td>
+                            <td><span class="winner" style="color:var(--accent-claude)">Claude Code CLI</span></td>
+                            <td><span class="badge claude">Claude</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="caveat mt-16">
+                <strong>⚠️ Benchmark honesty:</strong> OpenAI self-reports all GPT-5.4 numbers. Claude's SWE-Bench Pro (23.1%) is Scale AI's third-party eval. Different prompting, scaffolding, and infra = not a clean comparison. The coding gap is real but likely smaller than the headline suggests.
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 6 — CONTEXT & EFFICIENCY
+    ════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-6">
+        <div class="stagger" style="max-width: 680px;">
+            <span class="label both">Context & Efficiency</span>
+            <h2>How much can they <span class="gradient-text">hold?</span></h2>
+            <div class="divider both"></div>
+
+            <div class="ctx-vis mt-32">
+                <div class="ctx-row">
+                    <div class="ctx-label-row">
+                        <span class="gpt-text" style="font-weight:600; font-size:0.95rem;">GPT-5.4</span>
+                        <span class="gpt-text" style="font-weight:700;">1,000,000 tokens</span>
+                    </div>
+                    <div class="ctx-bar-track">
+                        <div class="ctx-bar gpt" style="width:100%; background: var(--gradient-gpt);"></div>
+                    </div>
+                    <span class="dim text-xs mt-4">~750,000 words · entire codebases · full legal filings</span>
+                </div>
+
+                <div class="ctx-row mt-16">
+                    <div class="ctx-label-row">
+                        <span class="claude-text" style="font-weight:600; font-size:0.95rem;">Claude Opus 4.6</span>
+                        <span class="claude-text" style="font-weight:700;">200,000 tokens</span>
+                    </div>
+                    <div class="ctx-bar-track">
+                        <div class="ctx-bar claude" style="width:20%; background: var(--gradient-claude);"></div>
+                    </div>
+                    <span class="dim text-xs mt-4">~150,000 words · very capable, but 5× smaller window</span>
+                </div>
+            </div>
+
+            <div class="grid-2 mt-32">
+                <div class="card gpt-card">
+                    <h3>🔋 Token Efficiency</h3>
+                    <p class="text-sm mt-8">GPT-5.4 uses significantly fewer tokens than GPT-5.2 for equivalent outputs. OpenAI's "Tool Search" means tools only load when needed — huge in multi-agent setups.</p>
+                </div>
+
+                <div class="card">
+                    <h3>💰 Cost Reality</h3>
+                    <p class="text-sm mt-8">Bigger context = bigger bills. GPT-5.4's 1M window is powerful but don't leave it stuffed unless you need it. Claude Sonnet 4.6 is the budget-smart daily driver.</p>
+                </div>
+            </div>
+
+            <div class="card info-card mt-20">
+                <p class="text-sm"><strong style="color:var(--accent-info)">New in GPT-5.4 Thinking:</strong> "Upfront plan" — model shows its plan before responding so you can redirect mid-stream. First model to do this.</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 7 — CLAUDE CODE + GPT-5.4?
+    ════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-7">
+        <div class="stagger" style="max-width: 720px;">
+            <span class="label both">The Setup Question</span>
+            <h2>Can Claude Code use <span class="gpt-text">GPT-5.4</span>?</h2>
+            <div class="divider both"></div>
+
+            <div class="card mt-24" style="border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05);">
+                <h3 class="gpt-text">✅ Yes — via LiteLLM proxy</h3>
+                <p class="text-sm mt-8">Claude Code talks to an Anthropic-format API. Proxy it through LiteLLM and you can route any model behind it.</p>
+            </div>
+
+            <pre class="mt-24"><code class="comment"># Install LiteLLM</code>
+pip install litellm[proxy]
+
+<code class="comment"># Start proxy that translates Anthropic → OpenAI format</code>
+<code class="key">litellm</code> --model <code class="val">openai/gpt-5.4</code> --port 8080
+
+<code class="comment"># Point Claude Code at your proxy</code>
+<code class="key">ANTHROPIC_BASE_URL</code>=<code class="val">http://localhost:8080</code> \
+<code class="key">ANTHROPIC_MODEL</code>=<code class="val">openai/gpt-5.4</code> \
+claude</pre>
+
+            <div class="grid-2 mt-20">
+                <div class="card warn-card">
+                    <h3 style="color:var(--accent-warn);">⚠️ Caveats</h3>
+                    <ul class="mt-8">
+                        <li>Not officially supported by Anthropic</li>
+                        <li>Tool call format differences may cause issues</li>
+                        <li>Expect quirks with complex agentic tasks</li>
+                        <li>Latency overhead from proxy layer</li>
+                    </ul>
+                </div>
+
+                <div class="card info-card">
+                    <h3 style="color:var(--accent-info);">💡 Better alternatives</h3>
+                    <ul class="mt-8">
+                        <li><strong>OpenCode</strong> (opencode.ai) — natively supports both providers, switching models per task</li>
+                        <li><strong>Goose CLI</strong> — Claude Code as lead, GPT as worker</li>
+                        <li>Use each tool natively for what it's best at</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 8 — DECISION MATRIX
+    ════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-8">
+        <div class="stagger" style="max-width: 760px;">
+            <span class="label both">Decision Matrix</span>
+            <h2>Use <span class="gpt-text">THIS</span> when…</h2>
+            <div class="divider both"></div>
+
+            <div style="margin-top: 24px;">
+                <div class="flex-row" style="justify-content:space-between; margin-bottom:12px; padding: 0 8px;">
+                    <span class="badge gpt" style="font-size:13px; padding: 6px 16px;">🟢 GPT-5.4</span>
+                    <span class="badge claude" style="font-size:13px; padding: 6px 16px;">🟣 Claude Opus 4.6</span>
+                </div>
+
+                <div class="matrix-row">
+                    <div class="matrix-cell gpt-cell">Building a slide deck or financial model</div>
+                    <div class="matrix-vs">vs</div>
+                    <div class="matrix-cell claude-cell">Writing or refactoring code in your repo</div>
+                </div>
+
+                <div class="matrix-row">
+                    <div class="matrix-cell gpt-cell">Automating a repetitive GUI task (form fills, browser workflows)</div>
+                    <div class="matrix-vs">vs</div>
+                    <div class="matrix-cell claude-cell">Multi-step agentic dev with Claude Code</div>
+                </div>
+
+                <div class="matrix-row">
+                    <div class="matrix-cell gpt-cell">Analyzing a 500K-word document or giant codebase in one shot</div>
+                    <div class="matrix-vs">vs</div>
+                    <div class="matrix-cell claude-cell">Tight instruction-following with nuanced context</div>
+                </div>
+
+                <div class="matrix-row">
+                    <div class="matrix-cell gpt-cell">Legal doc review, contract analysis, compliance work</div>
+                    <div class="matrix-vs">vs</div>
+                    <div class="matrix-cell claude-cell">Anything deeply integrated with your dev workflow</div>
+                </div>
+
+                <div class="matrix-row">
+                    <div class="matrix-cell gpt-cell">Tool-heavy orchestration (many APIs, dynamic tool lookup)</div>
+                    <div class="matrix-vs">vs</div>
+                    <div class="matrix-cell claude-cell">When you want transparent chain-of-thought reasoning</div>
+                </div>
+            </div>
+
+            <div class="card mt-20" style="background: rgba(56,189,248,0.04); border-color: rgba(56,189,248,0.15);">
+                <p class="text-sm"><strong style="color:var(--accent-info)">Default stack:</strong> Claude Sonnet 4.6 for daily coding (fast + cheap), Claude Opus 4.6 for hard reasoning tasks, GPT-5.4 for office/knowledge work where it clearly wins.</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 9 — BOTTOM LINE
+    ════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-9" style="align-items:center; text-align:center;">
+        <div class="stagger" style="max-width: 620px; display:flex; flex-direction:column; align-items:center;">
+            <span class="label both">Bottom Line</span>
+            <h2>The honest <span class="gradient-wave" style="background: var(--gradient-wave); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">recommendation</span></h2>
+            <div class="divider both" style="margin: 20px auto;"></div>
+
+            <div class="card mt-8" style="text-align:left; max-width:100%;">
+                <ul style="list-style:none; padding:0;">
+                    <li style="padding: 12px 0; border-bottom: 1px solid var(--border-subtle); padding-left:0; margin:0;">
+                        <span style="font-size:1.1rem;">🟣</span>&nbsp; <strong>Keep Claude Code for coding.</strong> <span class="muted" style="font-size:0.9rem;">The tooling integration is unmatched. GPT-5.4's SWE-Bench lead is real but overblown by eval conditions.</span>
+                    </li>
+                    <li style="padding: 12px 0; border-bottom: 1px solid var(--border-subtle); padding-left:0; margin:0;">
+                        <span style="font-size:1.1rem;">🟢</span>&nbsp; <strong>Add GPT-5.4 for office + automation tasks.</strong> <span class="muted" style="font-size:0.9rem;">Slide decks, financial models, computer-use automation. It's genuinely better here.</span>
+                    </li>
+                    <li style="padding: 12px 0; border-bottom: 1px solid var(--border-subtle); padding-left:0; margin:0;">
+                        <span style="font-size:1.1rem;">⚡</span>&nbsp; <strong>Use Sonnet 4.6 as your daily driver.</strong> <span class="muted" style="font-size:0.9rem;">Faster and cheaper. Reserve Opus for genuinely hard problems.</span>
+                    </li>
+                    <li style="padding: 12px 0; padding-left:0; margin:0;">
+                        <span style="font-size:1.1rem;">🔀</span>&nbsp; <strong>Skip the proxy hack.</strong> <span class="muted" style="font-size:0.9rem;">Running GPT-5.4 in Claude Code via LiteLLM is doable but fragile. Use the right tool natively. Or try OpenCode if you want unified switching.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card mt-20" style="background: rgba(16,185,129,0.06); border-color:rgba(16,185,129,0.2); width:100%; text-align:left;">
+                <p class="text-sm"><strong class="gpt-text">One-liner:</strong> GPT-5.4 is the best model for knowledge work and computer use. Claude Opus 4.6 is the best model for code and your dev workflow. Use both. Don't try to make one do everything.</p>
+            </div>
+
+            <p class="dim text-xs mt-24">Built March 5, 2026 · Research: GPT-5.4 release notes, Scale AI SWE-Bench leaderboard, OpenAI evals</p>
+        </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         JAVASCRIPT — follows SKILL.md pattern exactly
+    ════════════════════════════════════════════════════════════ -->
+    <script>
+        const slides    = document.querySelectorAll('.slide');
+        const navDots   = document.querySelectorAll('.nav-dot');
+        const progressBar = document.getElementById('progress');
+        const slideCounter = document.getElementById('slide-counter');
+
+        let currentSlide = 0;
+        let isNavigating = false;
+
+        /* ── goToSlide — single source of truth ─────────────── */
+        function goToSlide(index, smooth = true) {
+            if (index < 0 || index >= slides.length || isNavigating) return;
+
+            isNavigating = true;
+            const target = slides[index];
+
+            // Mark visible BEFORE scroll
+            target.classList.add('visible');
+
+            target.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+
+            currentSlide = index;
+            updateNav();
+            updateProgress();
+
+            setTimeout(() => { isNavigating = false; }, smooth ? 600 : 100);
+        }
+
+        /* ── Intersection Observer — handles manual scroll ───── */
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    if (!isNavigating) {
+                        const idx = Array.from(slides).indexOf(entry.target);
+                        if (idx !== currentSlide) {
+                            currentSlide = idx;
+                            updateNav();
+                            updateProgress();
+                        }
+                    }
+                }
+            });
+        }, { threshold: 0.3 });
+
+        slides.forEach(slide => observer.observe(slide));
+
+        /* ── Update nav dots & counter ────────────────────────── */
+        function updateNav() {
+            navDots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+                dot.setAttribute('aria-current', i === currentSlide ? 'true' : 'false');
+            });
+            if (slideCounter) {
+                slideCounter.textContent = (currentSlide + 1) + ' / ' + slides.length;
+            }
+        }
+
+        /* ── Progress bar ─────────────────────────────────────── */
+        function updateProgress() {
+            const pct = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = pct + '%';
+        }
+
+        /* ── Nav dot clicks ───────────────────────────────────── */
+        navDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                goToSlide(parseInt(dot.dataset.slide, 10));
+            });
+        });
+
+        /* ── Keyboard navigation ──────────────────────────────── */
+        document.addEventListener('keydown', (e) => {
+            if (['ArrowDown', 'ArrowRight', ' '].includes(e.key)) {
+                e.preventDefault();
+                goToSlide(currentSlide + 1);
+            } else if (['ArrowUp', 'ArrowLeft'].includes(e.key)) {
+                e.preventDefault();
+                goToSlide(currentSlide - 1);
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                goToSlide(0);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                goToSlide(slides.length - 1);
+            }
+        });
+
+        /* ── Touch / swipe ────────────────────────────────────── */
+        let touchStartY = 0;
+        let touchStartX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+            touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const diffY = touchStartY - e.changedTouches[0].clientY;
+            const diffX = touchStartX - e.changedTouches[0].clientX;
+            // Only trigger on predominantly vertical swipes
+            if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 50) {
+                goToSlide(currentSlide + (diffY > 0 ? 1 : -1));
+            }
+        }, { passive: true });
+
+        /* ── Mouse wheel (debounced) ──────────────────────────── */
+        let wheelTimeout = null;
+        document.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (wheelTimeout) return;
+            wheelTimeout = setTimeout(() => { wheelTimeout = null; }, 800);
+            goToSlide(currentSlide + (e.deltaY > 0 ? 1 : -1));
+        }, { passive: false });
+
+        /* ── Initial state ────────────────────────────────────── */
+        slides[0].classList.add('visible');
+        updateProgress();
+        updateNav();
+    </script>
+</body>
+</html>
