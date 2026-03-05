@@ -768,7 +768,7 @@
                 <div class="tldr-item" style="border-color: rgba(245,158,11,0.2);">
                     <div class="emoji">⚠️</div>
                     <h3 style="color: var(--accent-warn);">Benchmark warning</h3>
-                    <p>OpenAI self-reports evals. Third-party SWE-Bench Pro numbers for Claude (23.1%) and GPT-5.4 (57.7%) aren't apples-to-apples — conditions differ significantly.</p>
+                    <p>Both companies self-report evals. Third-party SWE-Bench Pro (Scale AI) shows them neck-and-neck: GPT-5 23.3% vs Opus 4.1 23.1%. Real difference = tooling, not benchmarks.</p>
                 </div>
             </div>
         </div>
@@ -889,10 +889,28 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>SWE-Bench Pro <span class="dim text-xs">*</span></td>
+                            <td>SWE-Bench Verified</td>
                             <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:58px"></div><span class="winner">57.7%</span></div></td>
-                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:23px"></div><span class="loser">23.1%</span></div></td>
-                            <td><span class="badge gpt">GPT-5.4</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:81px"></div><span class="winner" style="color:var(--accent-claude)">81%</span></div></td>
+                            <td><span class="badge claude">Claude</span></td>
+                        </tr>
+                        <tr>
+                            <td>Terminal-Bench 2.0</td>
+                            <td><span class="loser dim">N/A</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:65px"></div><span class="winner" style="color:var(--accent-claude)">65%</span></div></td>
+                            <td><span class="badge claude">Claude</span></td>
+                        </tr>
+                        <tr>
+                            <td>ARC-AGI (Novel Reasoning)</td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:53px"></div><span>52.9%</span></div></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:69px"></div><span class="winner" style="color:var(--accent-claude)">69%</span></div></td>
+                            <td><span class="badge claude">Claude</span></td>
+                        </tr>
+                        <tr>
+                            <td>GPQA Diamond (Science)</td>
+                            <td><span class="loser dim">N/A</span></td>
+                            <td><div class="bench-bar-wrap"><div class="bench-bar claude" style="width:91px"></div><span class="winner" style="color:var(--accent-claude)">91%</span></div></td>
+                            <td><span class="badge claude">Claude</span></td>
                         </tr>
                         <tr>
                             <td>OSWorld (Computer Use)</td>
@@ -907,29 +925,17 @@
                             <td><span class="badge gpt">GPT-5.4</span></td>
                         </tr>
                         <tr>
-                            <td>BrowseComp</td>
-                            <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:82px"></div><span class="winner">82.7%</span></div></td>
-                            <td><span class="loser dim">N/A</span></td>
-                            <td><span class="badge gpt">GPT-5.4</span></td>
-                        </tr>
-                        <tr>
                             <td>Spreadsheet Modeling</td>
                             <td><div class="bench-bar-wrap"><div class="bench-bar gpt" style="width:87px"></div><span class="winner">87.3%</span></div></td>
                             <td><span class="loser dim">N/A</span></td>
                             <td><span class="badge gpt">GPT-5.4</span></td>
-                        </tr>
-                        <tr>
-                            <td>Agentic Dev (real-world)</td>
-                            <td><span class="loser dim">Limited native tooling</span></td>
-                            <td><span class="winner" style="color:var(--accent-claude)">Claude Code CLI</span></td>
-                            <td><span class="badge claude">Claude</span></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
             <div class="caveat mt-16">
-                <strong>⚠️ Benchmark honesty:</strong> OpenAI self-reports all GPT-5.4 numbers. Claude's SWE-Bench Pro (23.1%) is Scale AI's third-party eval. Different prompting, scaffolding, and infra = not a clean comparison. The coding gap is real but likely smaller than the headline suggests.
+                <strong>⚠️ Benchmark honesty:</strong> Each company self-reports their own numbers. Third-party evals (Scale AI SWE-Bench Pro) show them much closer: GPT-5 at 23.3% vs Opus 4.1 at 23.1%. The truth is these models are extremely competitive — the real difference is in tooling and workflow fit, not headline benchmarks.
             </div>
         </div>
     </section>
@@ -959,12 +965,12 @@
                 <div class="ctx-row mt-16">
                     <div class="ctx-label-row">
                         <span class="claude-text" style="font-weight:600; font-size:0.95rem;">Claude Opus 4.6</span>
-                        <span class="claude-text" style="font-weight:700;">200,000 tokens</span>
+                        <span class="claude-text" style="font-weight:700;">1,000,000 tokens <span class="dim text-xs">(beta)</span></span>
                     </div>
                     <div class="ctx-bar-track">
-                        <div class="ctx-bar claude" style="width:20%; background: var(--gradient-claude);"></div>
+                        <div class="ctx-bar claude" style="width:100%; background: var(--gradient-claude);"></div>
                     </div>
-                    <span class="dim text-xs mt-4">~150,000 words · very capable, but 5× smaller window</span>
+                    <span class="dim text-xs mt-4">~750,000 words · 1M beta available, 200K standard · MRCR v2: 76% (8 needles across 1M tokens)</span>
                 </div>
             </div>
 
@@ -976,7 +982,7 @@
 
                 <div class="card">
                     <h3>💰 Cost Reality</h3>
-                    <p class="text-sm mt-8">Bigger context = bigger bills. GPT-5.4's 1M window is powerful but don't leave it stuffed unless you need it. Claude Sonnet 4.6 is the budget-smart daily driver.</p>
+                    <p class="text-sm mt-8">Both offer 1M tokens. GPT-5.4: $1.75/$14 per 1M tokens. Claude Opus 4.6: $5/$25 per 1M tokens. GPT-5.4 is significantly cheaper at scale. Claude Sonnet 4.6 is the budget daily driver.</p>
                 </div>
             </div>
 
@@ -1101,7 +1107,7 @@ claude</pre>
             <div class="card mt-8" style="text-align:left; max-width:100%;">
                 <ul style="list-style:none; padding:0;">
                     <li style="padding: 12px 0; border-bottom: 1px solid var(--border-subtle); padding-left:0; margin:0;">
-                        <span style="font-size:1.1rem;">🟣</span>&nbsp; <strong>Keep Claude Code for coding.</strong> <span class="muted" style="font-size:0.9rem;">The tooling integration is unmatched. GPT-5.4's SWE-Bench lead is real but overblown by eval conditions.</span>
+                        <span style="font-size:1.1rem;">🟣</span>&nbsp; <strong>Keep Claude Code for coding.</strong> <span class="muted" style="font-size:0.9rem;">Opus 4.6 leads SWE-Bench Verified (81%), Terminal-Bench (65%), and ARC-AGI (69%). The tooling integration is unmatched.</span>
                     </li>
                     <li style="padding: 12px 0; border-bottom: 1px solid var(--border-subtle); padding-left:0; margin:0;">
                         <span style="font-size:1.1rem;">🟢</span>&nbsp; <strong>Add GPT-5.4 for office + automation tasks.</strong> <span class="muted" style="font-size:0.9rem;">Slide decks, financial models, computer-use automation. It's genuinely better here.</span>
