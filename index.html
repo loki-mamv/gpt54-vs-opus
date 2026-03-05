@@ -73,12 +73,20 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
             padding: var(--slide-padding);
             opacity: 0;
             transform: translateY(28px);
             transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
                         transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
             z-index: 1;
+        }
+
+        .slide > .stagger,
+        .slide > div,
+        .slide > .slide-inner {
+            width: 100%;
+            max-width: 1100px;
         }
 
         .slide.visible {
